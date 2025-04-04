@@ -1,7 +1,7 @@
 name: UnitTests
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ runner.os }}-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -52,6 +52,15 @@ on:
       - '!examples/phi3_5/**'
       - '!examples/qwen2_5/**'
 
+env:
+  HF_HOME: ${GITHUB_WORKSPACE}/.cache/huggingface
+  HUGGING_FACE_HUB_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
+  WORKSPACE_SUBSCRIPTION_ID: ${{ secrets.WORKSPACE_SUBSCRIPTION_ID }}
+  WORKSPACE_RESOURCE_GROUP: ${{ secrets.WORKSPACE_RESOURCE_GROUP }}
+  WORKSPACE_NAME: ${{ secrets.WORKSPACE_NAME }}
+  MANAGED_IDENTITY_CLIENT_ID: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
+  EXCLUDE_MANAGED_IDENTITY_CREDENTIAL: ${{ secrets.EXCLUDE_MANAGED_IDENTITY_CREDENTIAL }}  
+
 jobs:
   unit-tests:
     strategy:
@@ -65,6 +74,10 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     steps:
+    - name: Debugging
+      run: |
+        echo "HF_HOME ${{ env.HF_HOME }}"
+
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -75,16 +88,9 @@ jobs:
         shell: ${{ matrix.config.shell }}
         requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
 
-    # - name: Cache dependencies
-    #   id: cache-deps
-    #   uses: actions/cache@v2
-    #   with:
-    #       path: '**/node_modules'
-    #       key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
     - name: Run Tests
       env:
         PYTEST_BASETEMP: ${GITHUB_WORKSPACE}/.pytest_basetemp
       run: |
-        coverage run --source=${GITHUB_WORKSPACE}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${GITHUB_WORKSPACE}/logs/test-TestOlive.xml ${GITHUB_WORKSPACE}/test/$(testType) --basetemp ${{ env.PYTEST_BASETEMP }}
+        coverage run --source=${GITHUB_WORKSPACE}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${GITHUB_WORKSPACE}/logs/test-TestOlive.xml ${GITHUB_WORKSPACE}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
         coverage xml
