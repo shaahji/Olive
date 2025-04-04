@@ -1,7 +1,7 @@
 name: UnitTests
 
 concurrency:
-  group: ${{ runner.os }}-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -86,6 +86,7 @@ jobs:
       timeout-minutes: 30
       with:
         shell: ${{ matrix.config.shell }}
+        hfcache_key: ${{ github.workflow }}-unittests-hfcache
         requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
 
     - name: Run Tests
