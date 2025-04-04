@@ -58,8 +58,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - { os: "ubuntu-latest", device: "cpu", shell: "bash -e {0}"}
-        - { os: "windows-latest", device: "cpu", shell: "%ComSpec% /D /E:ON /V:OFF /S /C \"CALL \"{0}\"\"" }
+        - { os: "ubuntu-latest", device: "cpu", shell: "bash"}
+        - { os: "windows-latest", device: "cpu", shell: "cmd" }
 
     name: Unit Tests | ${{ matrix.config.os }} | ${{ matrix.config.device }}
     runs-on: ${{ matrix.config.os }}
