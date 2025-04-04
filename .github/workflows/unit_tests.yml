@@ -70,7 +70,7 @@ jobs:
 
     - name: Run Setup
       uses: ./.github/actions/setup@main
-      timeout: 300
+      timeout-minutes: 30
       with:
         shell: ${{ matrix.config.shell }}
         requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
