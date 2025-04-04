@@ -2,6 +2,10 @@ name: Olive | CI Setup Composite Workflow
 description: "Composite workflow to setup Olive CI"
 
 inputs:
+  shell:
+    description: "Shell to use."
+    required: true
+
   python_version:
     description: "Python version to use."
     default: "3.10"
@@ -28,7 +32,6 @@ inputs:
 
 runs:
   using: "composite"
-  timeout: 300
   steps:
   - name: Setup python
     uses: actions/setup-python@v5
@@ -38,21 +41,26 @@ runs:
 
   - name: Install Torch
     if: ${{ inputs.torch != '' }}
+    shell: ${{ inputs.shell }}
     run: python -m pip install ${{ inputs.torch }}
 
   - name: Install Olive
+    shell: ${{ inputs.shell }}
     run: python -m pip install .
 
   - name: Install OnnxRuntime-Nightly
     if: ${{ inputs.onnxruntime != '' && inputs.onnxruntime_nightly }}
+    shell: ${{ inputs.shell }}
     run: |
       python -m pip install -r  https://raw.githubusercontent.com/microsoft/onnxruntime/refs/heads/main/requirements.txt
       python -m pip install ${{ inputs.onnxruntime }} --pre --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/ORT-Nightly/pypi/simple/ --disable-pip-version-check
 
   - name: Install OnnxRuntime
     if: ${{ inputs.onnxruntime != '' && !inputs.onnxruntime_nightly }}
+    shell: ${{ inputs.shell }}
     run: python -m pip install ${{ inputs.onnxruntime }}
 
   - name: Install requirements
     if: ${{ inputs.requirements_file != '' }}
+    shell: ${{ inputs.shell }}
     run: python -m pip install -r ${{ inputs.requirements_file }}

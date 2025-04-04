@@ -1,7 +1,7 @@
 name: UnitTests
 
 concurrency:
-  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -57,8 +57,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: ["cpu"]
-        os: ["ubuntu-latest", "windows-latest"]
+        - { device: "cpu", os: "ubuntu-latest", shell: "bash -e {0}"}
+        - { device: "cpu", os: "windows-latest", shell: "%ComSpec% /D /E:ON /V:OFF /S /C \"CALL \"{0}\"\"" }
 
     name: Unit Tests | ${{ matrix.os }} | ${{ matrix.device }}
     runs-on: ${{ matrix.os }}
@@ -68,9 +68,18 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Run Setup
-      uses: ./.github/actions/setup
+      uses: ./.github/actions/setup@main
+      timeout: 300
       with:
+        shell: ${{ matrix.shell }}
         requirements_file: "test/requirements-test-${{ matrix.device }}.txt"
+
+    # - name: Cache dependencies
+    #   id: cache-deps
+    #   uses: actions/cache@v2
+    #   with:
+    #       path: '**/node_modules'
+    #       key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
     - name: Run Tests
       env:
