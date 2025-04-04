@@ -1,0 +1,73 @@
+name: UnitTests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - rel-*
+    paths:
+      - '**'
+      - '!docs/*'
+      - '!examples/README.md'
+      - '!examples/**/README.md'
+      - '!README.md'
+      - '!CONTRIBUTING.md'
+      - '!LICENSE'
+      # commonly updated examples with no test
+      - '!examples/deepseek/**'
+      - '!examples/directml/llm/**'
+      - '!examples/directml/stable_diffusion_xl/**'
+      - '!examples/llama2/**'
+      - '!examples/llama3/**'
+      - '!examples/mistral/**'
+      - '!examples/open_llama/**'
+      - '!examples/phi2/**'
+      - '!examples/phi3/**'
+      - '!examples/phi3_5/**'
+      - '!examples/qwen2_5/**'
+  pull_request:
+    paths:
+      - '**'
+      - '!docs/*'
+      - '!examples/README.md'
+      - '!examples/**/README.md'
+      - '!README.md'
+      - '!CONTRIBUTING.md'
+      - '!LICENSE'
+      # commonly updated examples with no test
+      - '!examples/deepseek/**'
+      - '!examples/directml/llm/**'
+      - '!examples/directml/stable_diffusion_xl/**'
+      - '!examples/llama2/**'
+      - '!examples/llama3/**'
+      - '!examples/mistral/**'
+      - '!examples/open_llama/**'
+      - '!examples/phi2/**'
+      - '!examples/phi3/**'
+      - '!examples/phi3_5/**'
+      - '!examples/qwen2_5/**'
+
+jobs:
+  unit-tests:
+    strategy:
+      fail-false: false
+      matrix:
+        device: ["cpu"]
+        os: ["ubuntu-latest", "windows-latest"]
+
+    name: Unit Tests | ${{ matrix.os }} | ${{ matrix.device }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Run Setup
+      uses: microsoft/Olive/.github/actions/setup@main
+      with:
+        requirements_file: "test/requirements-test-${{ matrix.device }}.txt"
+
+    - name: Run Tests
+      env:
+        PYTEST_BASETEMP: ${GITHUB_WORKSPACE}/.pytest_basetemp
+      run: |
+        coverage run --source=${GITHUB_WORKSPACE}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${GITHUB_WORKSPACE}/logs/test-TestOlive.xml ${GITHUB_WORKSPACE}/test/$(testType) --basetemp ${{ env.PYTEST_BASETEMP }}
+        coverage xml
