@@ -57,11 +57,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        - { device: "cpu", os: "ubuntu-latest", shell: "bash -e {0}"}
-        - { device: "cpu", os: "windows-latest", shell: "%ComSpec% /D /E:ON /V:OFF /S /C \"CALL \"{0}\"\"" }
+        config:
+        - { os: "ubuntu-latest", device: "cpu", shell: "bash -e {0}"}
+        - { os: "windows-latest", device: "cpu", shell: "%ComSpec% /D /E:ON /V:OFF /S /C \"CALL \"{0}\"\"" }
 
-    name: Unit Tests | ${{ matrix.os }} | ${{ matrix.device }}
-    runs-on: ${{ matrix.os }}
+    name: Unit Tests | ${{ matrix.config.os }} | ${{ matrix.config.device }}
+    runs-on: ${{ matrix.config.os }}
 
     steps:
     - name: Checkout code
@@ -71,8 +72,8 @@ jobs:
       uses: ./.github/actions/setup@main
       timeout: 300
       with:
-        shell: ${{ matrix.shell }}
-        requirements_file: "test/requirements-test-${{ matrix.device }}.txt"
+        shell: ${{ matrix.config.shell }}
+        requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
 
     # - name: Cache dependencies
     #   id: cache-deps
