@@ -51,7 +51,7 @@ on:
 jobs:
   unit-tests:
     strategy:
-      fail-false: false
+      fail-fast: false
       matrix:
         device: ["cpu"]
         os: ["ubuntu-latest", "windows-latest"]
