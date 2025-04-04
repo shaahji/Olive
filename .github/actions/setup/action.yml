@@ -30,9 +30,6 @@ runs:
   using: "composite"
   timeout: 300
   steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
-
   - name: Setup python
     uses: actions/setup-python@v5
     with:
