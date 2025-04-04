@@ -1,5 +1,9 @@
 name: UnitTests
 
+concurrency:
+  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:
@@ -61,7 +65,7 @@ jobs:
 
     steps:
     - name: Run Setup
-      uses: microsoft/Olive/.github/actions/setup@main
+      uses: ./.github/actions/setup
       with:
         requirements_file: "test/requirements-test-${{ matrix.device }}.txt"
 
