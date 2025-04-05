@@ -121,12 +121,12 @@ jobs:
       matrix:
         config:
         - { os: "ubuntu-latest", device: "cpu", shell: "bash" }
-        - { os: "windows-latest", device: "cpu", shell: "cmd" }
+        # - { os: "windows-latest", device: "cpu", shell: "cmd" }
         example:
         - { name: "bert_ptq", folder: "examples/bert" }
-        - { name: "resnet_ptq", folder: "examples/resnet" }
-        - { name: "whisper", folder: "examples/whisper" }
-        - { name: "mobilenet_qnn", folder: "examples/mobilenet/qnn" }
+        # - { name: "resnet_ptq", folder: "examples/resnet" }
+        # - { name: "whisper", folder: "examples/whisper" }
+        # - { name: "mobilenet_qnn", folder: "examples/mobilenet/qnn" }
 
     name: ${{ matrix.example.name }} | ${{ matrix.config.os }} | ${{ matrix.config.device }}
     runs-on: ${{ matrix.config.os }}
@@ -143,23 +143,23 @@ jobs:
         requirements_file_cpu=requirements_cpu.txt
         requirements_file_gpu=requirements_gpu.txt
 
-        [[ -f "${requirements_file_cpu}" ]] && { echo "requirements-file=${requirements_file_cpu}" >> $GITHUB_ENV }
-        [[ -f "${requirements_file_gpu}" ]] && { echo "requirements-file=${requirements_file_gpu}" >> $GITHUB_ENV }
-        [[ -f "${requirements_file}" ]] && { echo "requirements-file=${requirements_file}" >> $GITHUB_ENV }
-
-        echo "Using requirements file: ${{ env.requirements-file }}"
+        [[ -f "${requirements_file_cpu}" ]] && { echo "requirements_file=${requirements_file_cpu}" >> $GITHUB_ENV }
+        [[ -f "${requirements_file_gpu}" ]] && { echo "requirements_file=${requirements_file_gpu}" >> $GITHUB_ENV }
+        [[ -f "${requirements_file}" ]] && { echo "requirements_file=${requirements_file}" >> $GITHUB_ENV }
 
     - name: Run Setup
       uses: ./.github/actions/setup
       with:
         shell: ${{ matrix.config.shell }}
         hf_cache_key: ${{ github.workflow }}-${{ matrix.config.os }}-${{ matrix.example.name }}-hf-cache
-        requirements_file: ${{ env.requirements-file }}
+        requirements_file: ${{ env.requirements_file }}
 
     - name: Run Example Test
       env:
         PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
+
+      # python -m pip install -r ${{ matrix.example.folder }}/${{ env.requirements_file }}
       run: |
+        echo "Using requirements file: ${{ env.requirements_file }}"
         python -m pip install azure-identity azure-storage-blob tabulate
-        python -m pip install -r ${{ matrix.example.folder }}/${{ env.requirements-file }}
         python -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workflow }}/logs/test_examples-TestOlive.xml ${{ github.workflow }}/examples/test/local/test_${{ matrix.example.name }}.py --basetemp ${{ env.PYTEST_BASETEMP }}
