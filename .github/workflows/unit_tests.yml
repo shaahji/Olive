@@ -53,7 +53,7 @@ on:
       - '!examples/qwen2_5/**'
 
 env:
-  HF_HOME: ${GITHUB_WORKSPACE}/.cache/huggingface
+  HF_HOME: ${{ github.workspace }}/.cache/huggingface
   HUGGING_FACE_HUB_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
   WORKSPACE_SUBSCRIPTION_ID: ${{ secrets.WORKSPACE_SUBSCRIPTION_ID }}
   WORKSPACE_RESOURCE_GROUP: ${{ secrets.WORKSPACE_RESOURCE_GROUP }}
@@ -91,7 +91,8 @@ jobs:
 
     - name: Run Tests
       env:
-        PYTEST_BASETEMP: ${GITHUB_WORKSPACE}/.pytest_basetemp
+        PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
       run: |
-        coverage run --source=${GITHUB_WORKSPACE}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${GITHUB_WORKSPACE}/logs/test-TestOlive.xml ${GITHUB_WORKSPACE}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
+        echo coverage run --source=${{ github.workspace }}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test-TestOlive.xml ${{ github.workspace }}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
+        coverage run --source=${{ github.workspace }}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test-TestOlive.xml ${{ github.workspace }}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
         coverage xml
