@@ -43,6 +43,7 @@ runs:
       requirements_file: test/requirements-test-${{ inputs.device }}.txt
 
   - name: Run Tests
+    shell: ${{ inputs.shell }}
     env:
       PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
     run: |
