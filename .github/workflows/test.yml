@@ -6,35 +6,22 @@ on:
       runs-on:
         description: "OS to run the workflow on."
         required: true
-        type: choice
-        options:
-        - ubuntu-latest
-        - windows-latest
+        type: string
 
       test-type:
         description: "Type of test."
         required: true
-        type: choice
-        options:
-        - unit_test
-        - integ_test
-        - multiple_ep
+        type: string
 
       shell:
         description: "Shell to use."
         required: true
-        type: choice
-        options:
-        - bash
-        - cmd
+        type: string
 
       device:
         description: "Device to use."
         required: true
-        type: choice
-        options:
-        - cpu
-        - gpu
+        type: string
 
       pool:
         description: "Pool used to run the jobs."
