@@ -96,6 +96,7 @@ jobs:
   build-docs:
     name: Build Docs
     runs-on: "ubuntu-latest"
+    if: false
 
     steps:
     - name: Checkout Code
@@ -135,17 +136,27 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+
+        # [[ -f "${requirements_file_cpu}" ]] && { echo "requirements_file=${requirements_file_cpu}" >> $GITHUB_ENV }
+        # [[ -f "${requirements_file_gpu}" ]] && { echo "requirements_file=${requirements_file_gpu}" >> $GITHUB_ENV }
+        # [[ -f "${requirements_file}" ]] && { echo "requirements_file=${requirements_file}" >> $GITHUB_ENV }
+
     - name: Discover requirements file
       shell: bash
       working-directory: ${{ github.workspace }}/${{ matrix.example.folder }}
       run: |
+        echo PWD=$PWD
         requirements_file=requirements.txt
         requirements_file_cpu=requirements_cpu.txt
         requirements_file_gpu=requirements_gpu.txt
 
-        [[ -f "${requirements_file_cpu}" ]] && { echo "requirements_file=${requirements_file_cpu}" >> $GITHUB_ENV }
-        [[ -f "${requirements_file_gpu}" ]] && { echo "requirements_file=${requirements_file_gpu}" >> $GITHUB_ENV }
-        [[ -f "${requirements_file}" ]] && { echo "requirements_file=${requirements_file}" >> $GITHUB_ENV }
+        if [ -f "${requirements_file_cpu}" ]; then
+          echo "requirements_file=${requirements_file_cpu}" >> $GITHUB_ENV
+        elif [ -f "${requirements_file_gpu}" ]; then
+          echo "requirements_file=${requirements_file_gpu}" >> $GITHUB_ENV
+        elif [ -f "${requirements_file}" ]; then
+          echo "requirements_file=${requirements_file}" >> $GITHUB_ENV
+        fi
 
     - name: Run Setup
       uses: ./.github/actions/setup
