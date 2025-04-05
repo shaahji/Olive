@@ -82,7 +82,7 @@ jobs:
       uses: ./.github/actions/setup
       with:
         shell: ${{ matrix.config.shell }}
-        hf_cache_key: ${{ github.workflow }}-unittests-hf-cache
+        hf_cache_key: ${{ github.workflow }}-unit_test-hf-cache
         requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
 
     - name: Run Tests
@@ -121,15 +121,15 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - { os: "ubuntu-latest", device: "cpu", shell: "bash" }
-        - { os: "windows-latest", device: "cpu", shell: "cmd" }
+        - { os: "ubuntu-latest", shell: "bash" }
+        - { os: "windows-latest", shell: "cmd" }
         example:
-        - { name: "bert_ptq", folder: "examples/bert" }
-        - { name: "resnet_ptq", folder: "examples/resnet" }
-        - { name: "whisper", folder: "examples/whisper" }
-        - { name: "mobilenet_qnn", folder: "examples/mobilenet/qnn" }
+        - { name: "bert_ptq_cpu", model: "bert", folder: "examples/bert" }
+        - { name: "resnet_ptq_cpu", model: "resnet", folder: "examples/resnet" }
+        - { name: "whisper", model: "whisper", folder: "examples/whisper" }
+        - { name: "mobilenet_qnn_ep", model: "mobilenet", folder: "examples/mobilenet/qnn" }
 
-    name: ${{ matrix.example.name }} | ${{ matrix.config.os }} | ${{ matrix.config.device }}
+    name: ${{ matrix.example.name }} | ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
 
     steps:
@@ -157,7 +157,7 @@ jobs:
       uses: ./.github/actions/setup
       with:
         shell: ${{ matrix.config.shell }}
-        hf_cache_key: ${{ github.workflow }}-${{ matrix.config.os }}-${{ matrix.example.name }}-hf-cache
+        hf_cache_key: ${{ matrix.config.os }}-${{ matrix.example.model }}-hf-cache
         requirements_file: ${{ matrix.example.folder }}/${{ env.requirements_file }}
 
     - name: Run Example Test
@@ -166,4 +166,4 @@ jobs:
       run: |
         echo "Using requirements file: ${{ env.requirements_file }}"
         python -m pip install pytest azure-identity azure-storage-blob tabulate
-        python -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test_examples-TestOlive.xml ${{ github.workspace }}/examples/test/local/test_${{ matrix.example.name }}_${{ matrix.config.device }}.py --basetemp ${{ env.PYTEST_BASETEMP }}
+        python -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test_examples-TestOlive.xml ${{ github.workspace }}/examples/test/local/test_${{ matrix.example.name }}.py --basetemp ${{ env.PYTEST_BASETEMP }}
