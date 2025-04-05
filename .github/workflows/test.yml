@@ -1,5 +1,4 @@
 name: Test
-description: "Template to run test for Olive"
 
 on:
   workflow_call:

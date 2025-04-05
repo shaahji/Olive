@@ -62,58 +62,22 @@ env:
   EXCLUDE_MANAGED_IDENTITY_CREDENTIAL: ${{ secrets.EXCLUDE_MANAGED_IDENTITY_CREDENTIAL }}  
 
 jobs:
-  Linux | Unit Test | CPU:
-    uses: ./.github/workflows/test.yml
-    with:
-      runs-on: ubuntu-latest
-      test-type: unit_test
-      shell: bash
-      device: cpu
-    secrets: inherit
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on:
+        - { os: "ubuntu-latest", shell: "bash" }
+        - { os: "windows-latest", shell: "cmd" }
+        device: ["cpu"]
+        test-type: ["unit_test", "integ_test", "multiple_ep"]
 
-  Linux | Integration Test | CPU:
     uses: ./.github/workflows/test.yml
     with:
-      runs-on: ubuntu-latest
-      test-type: integ_test
-      shell: bash
-      device: cpu
-    secrets: inherit
-
-  Linux | Multiple-EP Test | CPU:
-    uses: ./.github/workflows/test.yml
-    with:
-      runs-on: ubuntu-latest
-      test-type: multiple_ep
-      shell: bash
-      device: cpu
-    secrets: inherit
-
-  Windows | Unit Test | CPU:
-    uses: ./.github/workflows/test.yml
-    with:
-      runs-on: windows-latest
-      test-type: unit_test
-      shell: cmd
-      device: cpu
-    secrets: inherit
-
-  Windows | Integration Test | CPU:
-    uses: ./.github/workflows/test.yml
-    with:
-      runs-on: windows-latest
-      test-type: integ_test
-      shell: cmd
-      device: cpu
-    secrets: inherit
-
-  Windows | Multiple-EP Test | CPU:
-    uses: ./.github/workflows/test.yml
-    with:
-      runs-on: windows-latest
-      test-type: multiple_ep
-      shell: cmd
-      device: cpu
+      runs-on: ${{ matrix.runs-on.os }}
+      shell: ${{ matrix.runs-on.shell }}
+      test-type: ${{ matrix.test-type }}
+      device: ${{ matrix.device }}
     secrets: inherit
 
   unit-tests:
