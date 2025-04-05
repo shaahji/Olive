@@ -72,13 +72,15 @@ jobs:
         device: ["cpu"]
         test-type: ["unit_test", "integ_test", "multiple_ep"]
 
-    uses: ./.github/workflows/test.yml
-    with:
-      runs-on: ${{ matrix.runs-on.os }}
-      shell: ${{ matrix.runs-on.shell }}
-      test-type: ${{ matrix.test-type }}
-      device: ${{ matrix.device }}
-    secrets: inherit
+    name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
+    runs-on: ${{ matrix.runs-on.os }}
+    steps:
+    - name: Run Test
+      uses: ./.github/actions/test
+      with:
+        shell: ${{ matrix.runs-on.shell }}
+        test-type: ${{ matrix.test-type }}
+        device: ${{ matrix.device }}
 
   unit-tests:
     strategy:
