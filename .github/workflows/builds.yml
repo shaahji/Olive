@@ -75,6 +75,9 @@ jobs:
     name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
     runs-on: ${{ matrix.runs-on.os }}
     steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
     - name: Run Test
       uses: ./.github/actions/test
       with:
