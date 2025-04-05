@@ -3,12 +3,13 @@ name: Test
 on:
   workflow_call:
     inputs:
-      runs-on: "OS to run the workflow on."
-      required: true
-      type: choice
-      options:
-      - ubuntu-latest
-      - windows-latest
+      runs-on:
+        description: "OS to run the workflow on."
+        required: true
+        type: choice
+        options:
+        - ubuntu-latest
+        - windows-latest
 
       test-type:
         description: "Type of test."
@@ -22,6 +23,10 @@ on:
       shell:
         description: "Shell to use."
         required: true
+        type: choice
+        options:
+        - bash
+        - cmd
 
       device:
         description: "Device to use."
@@ -34,6 +39,9 @@ on:
       pool:
         description: "Pool used to run the jobs."
         required: false
+
+env:
+  HF_HOME: ${{ github.workspace }}/.cache/huggingface
 
 jobs:
   test:
