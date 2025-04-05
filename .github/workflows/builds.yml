@@ -1,4 +1,4 @@
-name: UnitTests
+name: builds
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -86,13 +86,12 @@ jobs:
       timeout-minutes: 30
       with:
         shell: ${{ matrix.config.shell }}
-        hfcache_key: ${{ github.workflow }}-unittests-hfcache
+        hf_cache_key: ${{ github.workflow }}-unittests-hf-cache
         requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
 
     - name: Run Tests
       env:
         PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
       run: |
-        echo coverage run --source=${{ github.workspace }}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test-TestOlive.xml ${{ github.workspace }}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
         coverage run --source=${{ github.workspace }}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test-TestOlive.xml ${{ github.workspace }}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
         coverage xml
