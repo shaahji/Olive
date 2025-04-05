@@ -62,6 +62,60 @@ env:
   EXCLUDE_MANAGED_IDENTITY_CREDENTIAL: ${{ secrets.EXCLUDE_MANAGED_IDENTITY_CREDENTIAL }}  
 
 jobs:
+  Linux | Unit Test | CPU:
+    uses: ./.github/workflows/test.yml
+    with:
+      runs-on: ubuntu-latest
+      test-type: unit_test
+      shell: bash
+      device: cpu
+    secrets: inherit
+
+  Linux | Integration Test | CPU:
+    uses: ./.github/workflows/test.yml
+    with:
+      runs-on: ubuntu-latest
+      test-type: integ_test
+      shell: bash
+      device: cpu
+    secrets: inherit
+
+  Linux | Multiple-EP Test | CPU:
+    uses: ./.github/workflows/test.yml
+    with:
+      runs-on: ubuntu-latest
+      test-type: multiple_ep
+      shell: bash
+      device: cpu
+    secrets: inherit
+
+  Windows | Unit Test | CPU:
+    uses: ./.github/workflows/test.yml
+    with:
+      runs-on: windows-latest
+      test-type: unit_test
+      shell: cmd
+      device: cpu
+    secrets: inherit
+
+  Windows | Integration Test | CPU:
+    uses: ./.github/workflows/test.yml
+    with:
+      runs-on: windows-latest
+      test-type: integ_test
+      shell: cmd
+      device: cpu
+    secrets: inherit
+
+  Windows | Multiple-EP Test | CPU:
+    uses: ./.github/workflows/test.yml
+    with:
+      runs-on: windows-latest
+      test-type: multiple_ep
+      shell: cmd
+      device: cpu
+    secrets: inherit
+
   unit-tests:
     strategy:
       fail-fast: false
@@ -70,7 +124,7 @@ jobs:
         - { os: "ubuntu-latest", device: "cpu", shell: "bash" }
         - { os: "windows-latest", device: "cpu", shell: "cmd" }
 
-    name: Unit Tests | ${{ matrix.config.os }} | ${{ matrix.config.device }}
+    name: Unit Test | ${{ matrix.config.os }} | ${{ matrix.config.device }}
     runs-on: ${{ matrix.config.os }}
     if: false
 
@@ -131,6 +185,7 @@ jobs:
 
     name: ${{ matrix.example.name }} | ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
+    if: false
 
     steps:
     - name: Checkout Code
