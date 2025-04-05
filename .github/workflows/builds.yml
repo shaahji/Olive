@@ -122,12 +122,12 @@ jobs:
       matrix:
         config:
         - { os: "ubuntu-latest", device: "cpu", shell: "bash" }
-        # - { os: "windows-latest", device: "cpu", shell: "cmd" }
+        - { os: "windows-latest", device: "cpu", shell: "cmd" }
         example:
         - { name: "bert_ptq", folder: "examples/bert" }
-        # - { name: "resnet_ptq", folder: "examples/resnet" }
-        # - { name: "whisper", folder: "examples/whisper" }
-        # - { name: "mobilenet_qnn", folder: "examples/mobilenet/qnn" }
+        - { name: "resnet_ptq", folder: "examples/resnet" }
+        - { name: "whisper", folder: "examples/whisper" }
+        - { name: "mobilenet_qnn", folder: "examples/mobilenet/qnn" }
 
     name: ${{ matrix.example.name }} | ${{ matrix.config.os }} | ${{ matrix.config.device }}
     runs-on: ${{ matrix.config.os }}
