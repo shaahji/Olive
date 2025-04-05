@@ -26,6 +26,7 @@ on:
       pool:
         description: "Pool used to run the jobs."
         required: false
+        type: string
 
 env:
   HF_HOME: ${{ github.workspace }}/.cache/huggingface
