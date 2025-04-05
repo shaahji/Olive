@@ -136,11 +136,6 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-
-        # [[ -f "${requirements_file_cpu}" ]] && { echo "requirements_file=${requirements_file_cpu}" >> $GITHUB_ENV }
-        # [[ -f "${requirements_file_gpu}" ]] && { echo "requirements_file=${requirements_file_gpu}" >> $GITHUB_ENV }
-        # [[ -f "${requirements_file}" ]] && { echo "requirements_file=${requirements_file}" >> $GITHUB_ENV }
-
     - name: Discover requirements file
       shell: bash
       working-directory: ${{ github.workspace }}/${{ matrix.example.folder }}
@@ -169,8 +164,7 @@ jobs:
       env:
         PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
 
-      # python -m pip install -r ${{ matrix.example.folder }}/${{ env.requirements_file }}
       run: |
         echo "Using requirements file: ${{ env.requirements_file }}"
         python -m pip install pytest azure-identity azure-storage-blob tabulate
-        python -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workflow }}/logs/test_examples-TestOlive.xml ${{ github.workflow }}/examples/test/local/test_${{ matrix.example.name }}.py --basetemp ${{ env.PYTEST_BASETEMP }}
+        python -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test_examples-TestOlive.xml ${{ github.workspace }}/examples/test/local/test_${{ matrix.example.name }}.py --basetemp ${{ env.PYTEST_BASETEMP }}
