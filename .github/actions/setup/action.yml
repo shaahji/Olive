@@ -10,13 +10,11 @@ inputs:
 
   python_version:
     description: "Python version to use."
-    default: ${{ env.PYTHON_VERSION }}
-    required: false
+    required: true
 
   onnxruntime:
     description: "OnnxRuntime package name."
-    default: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
-    required: false
+    required: true
 
   onnxruntime_nightly:
     description: "Use OnnxRuntime nightly package?"
@@ -25,12 +23,11 @@ inputs:
 
   torch:
     description: "PyTorch package name."
-    default: ${{ env.PYTORCH_PACKAGE_NAME }}
-    required: false
+    required: true
 
   requirements_file:
     description: "Name/Path of the requirement's file."
-    required: false
+    required: true
 
   hf_cache_key:
     description: "Huggingface cache key to use."

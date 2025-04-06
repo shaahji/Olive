@@ -99,7 +99,10 @@ jobs:
       uses: ./.github/actions/cpu-test
       with:
         shell: ${{ matrix.runs-on.shell }}
+        python_version: ${{ env.PYTHON_VERSION }}
         test-type: ${{ matrix.test-type }}
+        onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+        torch: ${{ env.PYTORCH_PACKAGE_NAME }}
 
 
   gpu-test:
@@ -123,7 +126,10 @@ jobs:
       uses: ./.github/actions/gpu-test
       with:
         shell: ${{ matrix.runs-on.shell }}
+        python_version: ${{ env.PYTHON_VERSION }}
         test-type: ${{ matrix.test-type }}
+        onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+        torch: ${{ env.PYTORCH_PACKAGE_NAME }}
 
 
   build-docs:
