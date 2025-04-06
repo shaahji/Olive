@@ -1,19 +1,21 @@
-name: Olive | CI Setup Composite Workflow
-description: "Composite workflow to setup Olive CI"
+name: Olive CI | Setup Composite Workflow
+description: "Composite action to setup CI"
 
 inputs:
   shell:
     description: "Shell to use."
     required: true
+    type: choice
+    options: [ "bash", "cmd" ]
 
   python_version:
     description: "Python version to use."
-    default: "3.10"
+    default: ${{ env.PYTHON_VERSION }}
     required: false
 
   onnxruntime:
     description: "OnnxRuntime package name."
-    default: "onnxruntime"
+    default: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
     required: false
 
   onnxruntime_nightly:
@@ -23,7 +25,7 @@ inputs:
 
   torch:
     description: "PyTorch package name."
-    default: "torch"
+    default: ${{ env.PYTORCH_PACKAGE_NAME }}
     required: false
 
   requirements_file:
@@ -32,7 +34,7 @@ inputs:
 
   hf_cache_key:
     description: "Huggingface cache key to use."
-    required: false
+    required: true
 
 runs:
   using: "composite"

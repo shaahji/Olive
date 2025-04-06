@@ -1,0 +1,62 @@
+name: Olive CI | Test Composite Workflow
+description: "Composite action to run tests"
+
+inputs:
+  shell:
+    description: "Shell to use."
+    required: true
+    type: choice
+    options: [ "bash", "cmd" ]
+
+  python_version:
+    description: "Python version to use."
+    default: ${{ env.PYTHON_VERSION }}
+    required: false
+
+  test-type:
+    description: "Type of test."
+    required: true
+    type: choice
+    options: [ "unit_test", "integ_test", "multiple_ep" ]
+
+  onnxruntime:
+    description: "OnnxRuntime package name."
+    default: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+    required: false
+
+  onnxruntime_nightly:
+    description: "Use OnnxRuntime nightly package?"
+    default: false
+    required: false
+
+  torch:
+    description: "PyTorch package name."
+    default: ${{ env.PYTORCH_PACKAGE_NAME }}
+    required: false
+
+  requirements_file:
+    description: "Name/Path of the requirement's file."
+    default: "test/requirements-test-cpu.txt"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+  - name: Run Setup
+    uses: ./.github/actions/setup
+    with:
+      shell: ${{ inputs.shell }}
+      python_version: ${{ inputs.python_version }}
+      onnxruntime: ${{ inputs.onnxruntime }}
+      onnxruntime_nightly: ${{ inputs.onnxruntime_nightly }}
+      torch: ${{ inputs.torch }}
+      requirements_file: ${{ inputs.requirements_file }}
+      hf_cache_key: ${{ runner.os }}-${{ inputs.test-type }}-hf-cache
+
+  - name: Run Tests
+    shell: ${{ inputs.shell }}
+    env:
+      PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
+    run: |
+      coverage run --source=${{ github.workspace }}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test-TestOlive.xml ${{ github.workspace }}/test/${{ inputs.test-type }} --basetemp ${{ env.PYTEST_BASETEMP }}
+      coverage xml

@@ -1,4 +1,5 @@
 name: builds
+description: "CI workflow for Olive"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -53,16 +54,31 @@ on:
       - '!examples/qwen2_5/**'
 
 env:
+  PYTHON_VERSION: "3.10"
+  TENSORRT_VERSION: "10.5.0.18-1+cuda12.6"
+  PYTORCH_PACKAGE_NAME: "torch"
+  ONNXRUNTIME_PACKAGE_NAME: "onnxruntime"
+
   HF_HOME: ${{ github.workspace }}/.cache/huggingface
   HUGGING_FACE_HUB_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
-  WORKSPACE_SUBSCRIPTION_ID: ${{ secrets.WORKSPACE_SUBSCRIPTION_ID }}
-  WORKSPACE_RESOURCE_GROUP: ${{ secrets.WORKSPACE_RESOURCE_GROUP }}
-  WORKSPACE_NAME: ${{ secrets.WORKSPACE_NAME }}
-  MANAGED_IDENTITY_CLIENT_ID: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
-  EXCLUDE_MANAGED_IDENTITY_CREDENTIAL: ${{ secrets.EXCLUDE_MANAGED_IDENTITY_CREDENTIAL }}  
+
+  WORKSPACE_NAME: ${{ secrets.AZURE_WORKSPACE_NAME }}
+  WORKSPACE_SUBSCRIPTION_ID: ${{ secrets.AZURE_WORKSPACE_SUBSCRIPTION_ID }}
+  WORKSPACE_RESOURCE_GROUP: ${{ secrets.AZURE_WORKSPACE_RESOURCE_GROUP }}
+  MANAGED_IDENTITY_CLIENT_ID: ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+  EXCLUDE_MANAGED_IDENTITY_CREDENTIAL: ${{ secrets.AZURE_EXCLUDE_MANAGED_IDENTITY_CREDENTIAL }}
+  AZURE_KEY_VAULT: ${{ secrets.AZURE_KEY_VAULT }}
+
+  DOCKER_FILEPATH: "./.azure_pipelines/dockerfiles/linux-gpu.dockerfile"
+  DOCKER_IMAGE_NAME: "olive-pipeline:latest"
+  DOCKER_BASE_IMAGE_NAME: "mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04"
+
+  LINUX_CPU_POOL: "olive-1es-pool-ubuntu2004"
+  LINUX_GPU_POOL: "olive-1es-pool-ubuntu2004-gpu-v100-eastus"
+  WINDOWS_CPU_POOL: "olive-1es-pool-win2019"
 
 jobs:
-  test:
+  cpu-test:
     strategy:
       fail-fast: false
       matrix:
@@ -74,53 +90,46 @@ jobs:
 
     name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
     runs-on: ${{ matrix.runs-on.os }}
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Run Test
-      uses: ./.github/actions/test
+      uses: ./.github/actions/cpu-test
       with:
         shell: ${{ matrix.runs-on.shell }}
         test-type: ${{ matrix.test-type }}
-        device: ${{ matrix.device }}
 
-  unit-tests:
+
+  gpu-test:
     strategy:
       fail-fast: false
       matrix:
-        config:
-        - { os: "ubuntu-latest", device: "cpu", shell: "bash" }
-        - { os: "windows-latest", device: "cpu", shell: "cmd" }
+        runs-on:
+        # - { os: "ubuntu-latest", shell: "bash" }
+        - { os: "olive-1es-pool-ubuntu2004-gpu-v100-eastus", shell: "bash" }
+        device: ["gpu"]
+        test-type: ["unit_test"]
 
-    name: Unit Test | ${{ matrix.config.os }} | ${{ matrix.config.device }}
-    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
+    runs-on: ${{ matrix.runs-on.os }}
     if: false
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Run Setup
-      uses: ./.github/actions/setup
+    - name: Run Test
+      uses: ./.github/actions/gpu-test
       with:
-        shell: ${{ matrix.config.shell }}
-        hf_cache_key: ${{ github.workflow }}-unit_test-hf-cache
-        requirements_file: "test/requirements-test-${{ matrix.config.device }}.txt"
-
-    - name: Run Tests
-      env:
-        PYTEST_BASETEMP: ${{ github.workspace }}/.pytest_basetemp
-      run: |
-        coverage run --source=${{ github.workspace }}/olive -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test-TestOlive.xml ${{ github.workspace }}/test/unit_test --basetemp ${{ env.PYTEST_BASETEMP }}
-        coverage xml
+        shell: ${{ matrix.runs-on.shell }}
+        test-type: ${{ matrix.test-type }}
 
 
   build-docs:
     name: Build Docs
     runs-on: "ubuntu-latest"
     if: false
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -154,7 +163,6 @@ jobs:
 
     name: ${{ matrix.example.name }} | ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
-    if: false
 
     steps:
     - name: Checkout Code

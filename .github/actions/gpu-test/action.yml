@@ -1,0 +1,82 @@
+name: Olive CI | Test Composite Workflow
+description: "Composite action to run tests"
+
+inputs:
+  shell:
+    description: "Shell to use."
+    required: true
+    type: choice
+    options: [ "bash", "cmd" ]
+
+  python_version:
+    description: "Python version to use."
+    default: ${{ env.PYTHON_VERSION }}
+    required: false
+
+  test-type:
+    description: "Type of test."
+    required: true
+    type: choice
+    options: [ "unit_test", "integ_test", "multiple_ep" ]
+
+  onnxruntime:
+    description: "OnnxRuntime package name."
+    default: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+    required: false
+
+  onnxruntime_nightly:
+    description: "Use OnnxRuntime nightly package?"
+    default: false
+    required: false
+
+  torch:
+    description: "PyTorch package name."
+    default: ${{ env.PYTORCH_PACKAGE_NAME }}
+    required: false
+
+  requirements_file:
+    description: "Name/Path of the requirement's file."
+    default: "test/requirements-test-gpu.txt"
+    required: false
+
+  test_script:
+    description: "Name/Path of the script to run."
+    default: "run_test.sh"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+  - name: Clean Docker Images
+    shell: ${{ inputs.shell }}
+    run: |
+      docker system df
+      docker system prune -a -f
+      docker system df
+
+  - name: Build Docker Image
+    uses: ./.github/actions/docker
+    with:
+      shell: ${{ matrix.runs-on.shell }}
+
+  - name: Run Tests
+    shell: ${{ inputs.shell }}
+    run: |
+      docker run                                                                      \
+        --shm-size=4g                                                                 \
+        --gpus=all                                                                    \
+        -v /var/run/docker.sock:/var/run/docker.sock                                  \
+        -v ${{ github.workspace }}/logs:/logs                                         \
+        -e WORKSPACE_SUBSCRIPTION_ID=${{ secrets.AZURE_WORKSPACE_SUBSCRIPTION_ID }}   \
+        -e WORKSPACE_RESOURCE_GROUP=${{ secrets.AZURE_WORKSPACE_RESOURCE_GROUP }}     \
+        -e WORKSPACE_NAME=${{ secrets.AZURE_WORKSPACE_NAME }}                         \
+        -e MANAGED_IDENTITY_CLIENT_ID=${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }} \
+        ${{ env.DOCKER_IMAGE_NAME }}                                                  \
+        bash .azure_pipelines/scripts/${{ inputs.test_script }}                       \
+        ${{ env.PYTORCH_PACKAGE_NAME }}                                               \
+        ${{ env.ONNXRUNTIME_PACKAGE_NAME }}                                           \
+        ${{ inputs.onnxruntime_nightly }}                                             \
+        test/${{ inputs.requirements_file }}                                          \
+        test/${{ inputs.test_type }}                                                  \
+        false                                                                         \
+        ${{ env.HUGGING_FACE_HUB_TOKEN }}

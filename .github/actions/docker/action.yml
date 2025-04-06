@@ -1,0 +1,54 @@
+name: Olive CI | Docker Composite Workflow
+description: "Composite action to build docker image"
+
+inputs:
+  shell:
+    description: "Shell to use."
+    required: true
+    type: choice
+    options: [ "bash", "cmd" ]
+
+  python_version:
+    description: "Python version to use."
+    default: ${{ env.PYTHON_VERSION }}
+    required: false
+
+  base_image:
+    description: "Base image to use."
+    default: ${{ env.DOCKER_BASE_IMAGE_NAME }}
+    required: false
+
+  tensorrt_version:
+    description: "Version of TensorRT to install."
+    default: ${{ env.TENSORRT_VERSION }}
+    required: false
+
+  docker_image:
+    description: "Docker image to use."
+    default: ${{ env.DOCKER_IMAGE_NAME }}
+    required: false
+
+  docker_filepath:
+    description: "Docker file to use."
+    default: ${{ env.DOCKER_BASE_IMAGE_NAME }}
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+  - name: Build Docker Image
+    shell: ${{ inputs.shell }}
+    run: |
+      docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      docker build                                                      \
+        --build-arg BASE_IMAGE=${{ inputs.base_image }}                 \
+        --build-arg TENSORRT_VERSION=${{ inputs.tensorrt_version }}     \
+        --build-arg PYTHON_VERSION=${{ inputs.python_version }}         \
+        -t ${{ inputs.docker_image }}                                   \
+        -f ${{ github.workspace }}/${{ inputs.docker_filepath }} .
+
+      docker version
+      docker image ls
+      docker system df
+      df -h
