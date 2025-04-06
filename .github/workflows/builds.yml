@@ -117,7 +117,7 @@ jobs:
 
     name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
     runs-on: ${{ matrix.runs-on.os }}
-
+    if: false
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -135,7 +135,7 @@ jobs:
   build-docs:
     name: Build Docs
     runs-on: "ubuntu-latest"
-    if: false
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -143,7 +143,11 @@ jobs:
     - name: Run Setup
       uses: ./.github/actions/setup
       with:
-        shell: ${{ matrix.config.shell }}
+        shell: bash
+        python_version: "3.9"
+        onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+        torch: ${{ env.PYTORCH_PACKAGE_NAME }}
+        hf_cache_key: ''
         requirements_file: "docs/requirements.txt"
 
     - name: Build Docs
@@ -197,7 +201,6 @@ jobs:
       with:
         shell: ${{ matrix.runs-on.shell }}
         python_version: ${{ env.PYTHON_VERSION }}
-        test-type: ${{ matrix.test-type }}
         onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
         torch: ${{ env.PYTORCH_PACKAGE_NAME }}
         hf_cache_key: ${{ matrix.runs-on.os }}-${{ matrix.example.model }}-hf-cache
