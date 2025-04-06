@@ -90,7 +90,6 @@ jobs:
 
     name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
     runs-on: ${{ matrix.runs-on.os }}
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -132,32 +131,6 @@ jobs:
         torch: ${{ env.PYTORCH_PACKAGE_NAME }}
 
 
-  build-docs:
-    name: Build Docs
-    runs-on: "ubuntu-latest"
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
-    - name: Run Setup
-      uses: ./.github/actions/setup
-      with:
-        shell: bash
-        python_version: "3.9"
-        onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
-        torch: ${{ env.PYTORCH_PACKAGE_NAME }}
-        hf_cache_key: ''
-        requirements_file: "docs/requirements.txt"
-
-    - name: Build Docs
-      working-directory: ${{ github.workspace }}/docs
-      run: |
-        make html
-        make linkcheck
-        make schema
-
-
   examples:
     strategy:
       fail-fast: false
@@ -174,7 +147,6 @@ jobs:
 
     name: ${{ matrix.runs-on.os }} | ${{ matrix.example.name }} | ${{ matrix.device }}
     runs-on: ${{ matrix.runs-on.os }}
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -213,3 +185,28 @@ jobs:
         echo "Using requirements file: ${{ env.requirements_file }}"
         python -m pip install pytest azure-identity azure-storage-blob tabulate
         python -m pytest -v -s --log-cli-level=WARNING --junitxml=${{ github.workspace }}/logs/test_examples-TestOlive.xml ${{ github.workspace }}/examples/test/local/test_${{ matrix.example.name }}.py --basetemp ${{ env.PYTEST_BASETEMP }}
+
+
+  build-docs:
+    name: Build Docs
+    runs-on: "ubuntu-latest"
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Run Setup
+      uses: ./.github/actions/setup
+      with:
+        shell: bash
+        python_version: "3.9"
+        onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+        torch: ${{ env.PYTORCH_PACKAGE_NAME }}
+        hf_cache_key: ''
+        requirements_file: "docs/requirements.txt"
+
+    - name: Build Docs
+      working-directory: ${{ github.workspace }}/docs
+      run: |
+        make html
+        make linkcheck
+        make schema
