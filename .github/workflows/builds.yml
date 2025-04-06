@@ -117,7 +117,7 @@ jobs:
 
     name: ${{ matrix.runs-on.os }} | ${{ matrix.test-type }} | ${{ matrix.device }}
     runs-on: ${{ matrix.runs-on.os }}
-    if: false
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -158,17 +158,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
+        runs-on:
         - { os: "ubuntu-latest", shell: "bash" }
         - { os: "windows-latest", shell: "cmd" }
+        device: ["cpu"]
         example:
         - { name: "bert_ptq_cpu", model: "bert", folder: "examples/bert" }
         - { name: "resnet_ptq_cpu", model: "resnet", folder: "examples/resnet" }
         - { name: "whisper", model: "whisper", folder: "examples/whisper" }
         - { name: "mobilenet_qnn_ep", model: "mobilenet", folder: "examples/mobilenet/qnn" }
 
-    name: ${{ matrix.example.name }} | ${{ matrix.config.os }}
-    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.runs-on.os }} | ${{ matrix.example.name }} | ${{ matrix.device }}
+    runs-on: ${{ matrix.runs-on.os }}
 
     steps:
     - name: Checkout Code
@@ -194,8 +195,12 @@ jobs:
     - name: Run Setup
       uses: ./.github/actions/setup
       with:
-        shell: ${{ matrix.config.shell }}
-        hf_cache_key: ${{ matrix.config.os }}-${{ matrix.example.model }}-hf-cache
+        shell: ${{ matrix.runs-on.shell }}
+        python_version: ${{ env.PYTHON_VERSION }}
+        test-type: ${{ matrix.test-type }}
+        onnxruntime: ${{ env.ONNXRUNTIME_PACKAGE_NAME }}
+        torch: ${{ env.PYTORCH_PACKAGE_NAME }}
+        hf_cache_key: ${{ matrix.runs-on.os }}-${{ matrix.example.model }}-hf-cache
         requirements_file: ${{ matrix.example.folder }}/${{ env.requirements_file }}
 
     - name: Run Example Test
